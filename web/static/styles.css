@@ -1,0 +1,120 @@
+:root {
+  --bg: #fafaf7;
+  --fg: #1a1a1a;
+  --muted: #6b6b6b;
+  --border: #e4e2dc;
+  --accent: #2a5d34;
+  --accent-2: #7c9e88;
+  --card: #ffffff;
+  --danger: #b04040;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); }
+header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  background: white;
+}
+header h1 { margin: 0; font-size: 1.15rem; }
+.cart-summary button {
+  background: var(--accent); color: white; border: 0;
+  padding: 0.5rem 0.9rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem;
+}
+.layout {
+  display: grid; grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 1rem; padding: 1rem; max-width: 1400px; margin: 0 auto;
+}
+@media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+
+.storefront { min-width: 0; }
+.search-bar { display: flex; gap: 0.5rem; }
+.search-bar input { flex: 1; padding: 0.6rem 0.8rem; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem; }
+.search-bar button {
+  background: var(--fg); color: white; border: 0; padding: 0 1.2rem;
+  border-radius: 6px; cursor: pointer; font-size: 0.95rem;
+}
+.filters { display: flex; gap: 1rem; flex-wrap: wrap; padding: 0.75rem 0; color: var(--muted); font-size: 0.9rem; }
+.filters label { display: flex; gap: 0.4rem; align-items: center; }
+.filters select, .filters input { padding: 0.35rem 0.5rem; border: 1px solid var(--border); border-radius: 5px; }
+.hint { color: var(--muted); font-size: 0.9rem; }
+
+.results {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.75rem; margin-top: 0.5rem;
+}
+.book {
+  background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+  padding: 0.75rem; display: flex; flex-direction: column; gap: 0.35rem;
+}
+.book .title { font-weight: 600; line-height: 1.2; }
+.book .author, .book .meta { color: var(--muted); font-size: 0.85rem; }
+.book .description { font-size: 0.85rem; color: #333; flex: 1; }
+.book .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 0.4rem; }
+.book .price { font-weight: 700; }
+.book .add {
+  background: var(--accent-2); color: white; border: 0; border-radius: 5px;
+  padding: 0.35rem 0.7rem; cursor: pointer; font-size: 0.85rem;
+}
+.book .add:disabled { background: #bbb; cursor: not-allowed; }
+
+.chat {
+  background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+  display: flex; flex-direction: column; height: calc(100vh - 140px); min-height: 400px;
+  position: sticky; top: 1rem;
+}
+.chat-header {
+  padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.chat-model { color: var(--muted); font-size: 0.8rem; font-family: ui-monospace, monospace; }
+.chat-messages {
+  flex: 1; overflow-y: auto; padding: 0.8rem; display: flex; flex-direction: column; gap: 0.5rem;
+}
+.msg { padding: 0.5rem 0.75rem; border-radius: 8px; max-width: 90%; font-size: 0.92rem; line-height: 1.35; white-space: pre-wrap; }
+.msg.user { background: var(--accent); color: white; align-self: flex-end; }
+.msg.bot { background: #f0efe9; align-self: flex-start; }
+.msg.tool {
+  background: transparent; border: 1px dashed var(--border); color: var(--muted);
+  font-family: ui-monospace, monospace; font-size: 0.78rem; align-self: flex-start;
+}
+.chat-form { display: flex; gap: 0.4rem; padding: 0.6rem; border-top: 1px solid var(--border); }
+.chat-form input { flex: 1; padding: 0.5rem; border: 1px solid var(--border); border-radius: 5px; font-size: 0.92rem; }
+.chat-form button { background: var(--fg); color: white; border: 0; padding: 0 1rem; border-radius: 5px; cursor: pointer; }
+.chat-off { padding: 1rem; }
+.chat-off pre { background: #f0efe9; padding: 0.5rem; border-radius: 4px; overflow-x: auto; }
+
+.drawer {
+  position: fixed; top: 0; right: 0; width: min(420px, 100%); height: 100%;
+  background: var(--card); border-left: 1px solid var(--border);
+  box-shadow: -6px 0 20px rgba(0,0,0,0.05); z-index: 20;
+  display: flex; flex-direction: column;
+}
+.drawer[hidden] { display: none; }
+.drawer-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.75rem 1rem; border-bottom: 1px solid var(--border);
+}
+.drawer-header h2 { margin: 0; font-size: 1.05rem; }
+.drawer-header button { background: transparent; border: 0; font-size: 1.2rem; cursor: pointer; }
+#cart-items { flex: 1; overflow-y: auto; padding: 0.5rem 1rem; }
+.cart-item { display: grid; grid-template-columns: 1fr auto; gap: 0.3rem 1rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+.cart-item .qty { display: flex; gap: 0.3rem; align-items: center; }
+.cart-item .qty button { width: 26px; height: 26px; border: 1px solid var(--border); background: white; border-radius: 4px; cursor: pointer; }
+.cart-item .remove { background: transparent; border: 0; color: var(--danger); cursor: pointer; font-size: 0.8rem; padding: 0; }
+.drawer-footer { padding: 0.75rem 1rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 0.6rem; }
+.drawer-footer button { background: var(--accent); color: white; border: 0; padding: 0.55rem 1rem; border-radius: 5px; cursor: pointer; }
+.drawer-footer button:disabled { background: #bbb; cursor: not-allowed; }
+
+dialog {
+  border: 0; border-radius: 8px; padding: 1.25rem; min-width: 320px; max-width: 480px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+}
+dialog::backdrop { background: rgba(0,0,0,0.35); }
+dialog h2 { margin-top: 0; }
+dialog label { display: block; margin-bottom: 0.6rem; font-size: 0.9rem; color: var(--muted); }
+dialog input, dialog textarea { display: block; width: 100%; padding: 0.45rem 0.55rem; border: 1px solid var(--border); border-radius: 5px; font: inherit; margin-top: 0.15rem; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.8rem; }
+.dialog-actions button { padding: 0.5rem 0.9rem; border-radius: 5px; border: 1px solid var(--border); background: white; cursor: pointer; }
+.dialog-actions #place-order { background: var(--accent); color: white; border-color: var(--accent); }

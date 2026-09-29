@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agentic Bookstore</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header>
+    <h1>📚 Agentic Bookstore</h1>
+    <div class="cart-summary">
+      <button id="open-cart" type="button">🛒 Cart (<span id="cart-count">0</span>) — $<span id="cart-subtotal">0.00</span></button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="storefront">
+      <form id="search-form" class="search-bar">
+        <input id="q" type="search" name="query" placeholder="Search title, author, description, or ISBN…" autocomplete="off">
+        <button type="submit">Search</button>
+      </form>
+
+      <div class="filters">
+        <label>Genre
+          <select id="f-genre">
+            <option value="">Any</option>
+            <option>Fiction</option><option>Sci-Fi</option><option>Fantasy</option>
+            <option>Mystery</option><option>Romance</option><option>Biography</option>
+            <option>History</option><option>Self-Help</option><option>Children's</option>
+            <option>Technical</option><option>Poetry</option><option>Horror</option>
+            <option>Thriller</option><option>Cookbook</option><option>Non-fiction</option>
+          </select>
+        </label>
+        <label>Format
+          <select id="f-medium">
+            <option value="">Any</option>
+            <option value="digital">Digital</option>
+            <option value="physical">Physical</option>
+          </select>
+        </label>
+        <label>Max price $
+          <input id="f-max" type="number" min="0" step="1" placeholder="—">
+        </label>
+      </div>
+
+      <div id="results" class="results"><p class="hint">Search for something above, or ask the agent →</p></div>
+    </section>
+
+    <aside class="chat" id="chat-panel" hidden>
+      <div class="chat-header">
+        <strong>Shop with AI</strong>
+        <span class="chat-model" id="chat-model">…</span>
+      </div>
+      <div id="chat-messages" class="chat-messages">
+        <div class="msg bot">Hi! Try: <em>"Find me a fantasy ebook under $10 and buy it."</em></div>
+      </div>
+      <form id="chat-form" class="chat-form">
+        <input id="chat-input" type="text" placeholder="Ask the shopkeeper…" autocomplete="off">
+        <button type="submit">Send</button>
+      </form>
+    </aside>
+
+    <aside class="chat chat-off" id="chat-off" hidden>
+      <div class="chat-header"><strong>Shop with AI</strong></div>
+      <p>Chat is offline. Start <a href="https://ollama.com" target="_blank" rel="noopener">Ollama</a> and pull the model:</p>
+      <pre>ollama pull qwen2.5:7b</pre>
+      <p>Then refresh this page.</p>
+    </aside>
+  </main>
+
+  <div id="cart-drawer" class="drawer" hidden>
+    <div class="drawer-header">
+      <h2>Your cart</h2>
+      <button id="close-cart" type="button">✕</button>
+    </div>
+    <div id="cart-items"></div>
+    <div class="drawer-footer">
+      <div>Subtotal: <strong>$<span id="drawer-subtotal">0.00</span></strong></div>
+      <button id="open-checkout" type="button" disabled>Checkout</button>
+    </div>
+  </div>
+
+  <dialog id="checkout-modal">
+    <form id="checkout-form" method="dialog">
+      <h2>Complete your order</h2>
+      <p class="hint">All fields optional for digital-only orders.</p>
+      <label>Name <input name="shipping_name" type="text" autocomplete="name"></label>
+      <label>Email <input name="email" type="email" autocomplete="email"></label>
+      <label>Shipping address <textarea name="shipping_address" rows="2" autocomplete="street-address"></textarea></label>
+      <div class="dialog-actions">
+        <button value="cancel" type="submit">Cancel</button>
+        <button id="place-order" value="confirm" type="submit">Place order</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="confirmation-modal">
+    <h2>✅ Order placed!</h2>
+    <p>Order <code id="conf-id"></code></p>
+    <p>Total: <strong>$<span id="conf-total"></span></strong></p>
+    <p id="conf-delivery"></p>
+    <button id="close-confirmation" type="button">Keep shopping</button>
+  </dialog>
+
+  <script src="/static/storefront.js" defer></script>
+  <script src="/static/chat.js" defer></script>
+</body>
+</html>

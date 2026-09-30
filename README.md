@@ -68,3 +68,5 @@ pytest -q
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+This project was built with AI assistance. All code has been tested and reviewed by me.

@@ -1,3 +1,15 @@
+# Secrets and environment variables
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+credentials.json
+
+# Security scan output
+trufflehog-report.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -39,10 +51,13 @@ data/*.db
 data/*.db-journal
 data/*.db-wal
 data/*.db-shm
+*.sqlite
+*.db
 
-# Env
-.env
-.env.local
+# Node
+node_modules/
+npm-debug.log*
+*.log
 
 # OS
 .DS_Store

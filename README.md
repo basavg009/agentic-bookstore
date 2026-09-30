@@ -1,6 +1,13 @@
 # agentic-bookstore
 
+[![CI](https://github.com/basavg009/agentic-bookstore/actions/workflows/ci.yml/badge.svg)](https://github.com/basavg009/agentic-bookstore/actions/workflows/ci.yml)
+
 Open-source **agentic commerce** demo: a 10,000-book catalog exposed three ways from one shared Python service layer.
+
+> **An evolving reference project.** The goal is to work out, in running code, the best
+> practices for systems where AI agents act on a user's behalf — and, step by step, where
+> several agents cooperate. Each stage adds one capability together with the guardrails,
+> tests and design notes it needs. See [Project status and roadmap](#project-status-and-roadmap).
 
 - **MCP server** — plug the store into Claude Desktop, VS Code Copilot, Cline, or any [Model Context Protocol](https://modelcontextprotocol.io) client so an LLM can search, cart, and check out on your behalf.
 - **Web storefront** — classic search / add-to-cart / checkout for humans.
@@ -89,6 +96,37 @@ Payment goes through a `PaymentProvider` protocol (`services/payments.py`); the 
 approves up to $10,000 so the declined path can be exercised.
 
 Upgrading an existing database: new tables are created automatically on startup.
+
+## Project status and roadmap
+
+The principle throughout: **guardrails live in code, not in prompts.** Each new agent
+capability ships with the controls that keep it safe even when a model is wrong or fooled.
+
+**Today — one in-app agent, open to external agents**
+
+- A single shopping agent (local Qwen) with a bounded tool set, per-turn budgets and
+  server-side memory.
+- The same tools exposed over MCP, so *other* agents (Claude Desktop, Copilot, Cline, …) can
+  shop here as clients — the store already treats agents it didn't build as untrusted callers.
+- Human-in-the-loop for money-moving actions, identity from the transport, idempotent and
+  race-safe checkout (see [Design guarantees](#design-guarantees)).
+
+**Next — toward a multi-agent setup**
+
+- [ ] **Evaluation harness** — scripted shopping tasks with pass-rate gates in CI, so agent
+      behaviour is regression-tested like code.
+- [ ] **Tracing** — one trace per turn covering model calls, tool calls, tokens and latency.
+- [ ] **Specialist agents** — split the shopkeeper into a router plus focused agents
+      (discovery/recommendations, cart & checkout, order support), each with the minimum tool
+      set it needs.
+- [ ] **Agent-to-agent handoffs** — explicit, typed handoffs with shared state kept in the
+      service layer rather than passed through prompts.
+- [ ] **Remote MCP with OAuth** — scoped, delegated credentials so a user's personal agent can
+      shop here without a shared secret.
+- [ ] **Hybrid search** — semantic + keyword retrieval ("like *Dune*, but shorter") with
+      structured filters.
+
+Contributions and ideas are welcome — open an issue to discuss.
 
 ## Tests
 

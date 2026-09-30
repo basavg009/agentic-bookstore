@@ -92,6 +92,7 @@ header h1 { margin: 0; font-size: 1.15rem; }
   display: flex; flex-direction: column;
 }
 .drawer[hidden] { display: none; }
+.chat[hidden] { display: none; }
 .drawer-header {
   display: flex; justify-content: space-between; align-items: center;
   padding: 0.75rem 1rem; border-bottom: 1px solid var(--border);
@@ -118,3 +119,13 @@ dialog input, dialog textarea { display: block; width: 100%; padding: 0.45rem 0.
 .dialog-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.8rem; }
 .dialog-actions button { padding: 0.5rem 0.9rem; border-radius: 5px; border: 1px solid var(--border); background: white; cursor: pointer; }
 .dialog-actions #place-order { background: var(--accent); color: white; border-color: var(--accent); }
+
+/* Two-phase checkout review + chat confirmation card */
+.order-review { margin: 0.75rem 0; padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 6px; }
+.order-review h3 { margin: 0 0 0.5rem; font-size: 1rem; }
+.review-line { display: flex; justify-content: space-between; gap: 1rem; padding: 0.15rem 0; }
+.review-line.total { border-top: 1px solid #ddd; margin-top: 0.35rem; padding-top: 0.35rem; }
+.msg.confirm-card { background: #fffbe6; border: 1px solid #f0d56b; white-space: normal; }
+.msg.confirm-card h3 { margin: 0 0 0.35rem; font-size: 0.95rem; }
+.confirm-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap; }
+.chat-reset { margin-left: auto; font-size: 0.8rem; }

@@ -23,6 +23,9 @@ def _make_engine(url: str) -> Engine:
         connect_args={"check_same_thread": False} if url.startswith("sqlite") else {},
     )
 
+    if not url.startswith("sqlite"):
+        return engine
+
     @event.listens_for(engine, "connect")
     def _set_sqlite_pragma(dbapi_connection, _connection_record):  # noqa: ANN001
         # Enable FK cascades + WAL for concurrent reads.
@@ -30,6 +33,14 @@ def _make_engine(url: str) -> Engine:
         cur.execute("PRAGMA foreign_keys=ON")
         cur.execute("PRAGMA journal_mode=WAL")
         cur.close()
+        # pysqlite only emits BEGIN before DML, so SELECTs would each see a different
+        # snapshot. Take over transaction control so a transaction reads one snapshot
+        # and a write after a concurrent commit fails instead of acting on stale data.
+        dbapi_connection.isolation_level = None
+
+    @event.listens_for(engine, "begin")
+    def _begin(conn):  # noqa: ANN001
+        conn.exec_driver_sql("BEGIN")
 
     return engine
 

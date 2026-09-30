@@ -51,6 +51,7 @@
       <div class="chat-header">
         <strong>Shop with AI</strong>
         <span class="chat-model" id="chat-model">…</span>
+        <button id="chat-reset" type="button" class="chat-reset" title="Forget this conversation">New chat</button>
       </div>
       <div id="chat-messages" class="chat-messages">
         <div class="msg bot">Hi! Try: <em>"Find me a fantasy ebook under $10 and buy it."</em></div>
@@ -88,9 +89,11 @@
       <label>Name <input name="shipping_name" type="text" autocomplete="name"></label>
       <label>Email <input name="email" type="email" autocomplete="email"></label>
       <label>Shipping address <textarea name="shipping_address" rows="2" autocomplete="street-address"></textarea></label>
+      <div id="order-review" class="order-review" hidden></div>
       <div class="dialog-actions">
         <button value="cancel" type="submit">Cancel</button>
-        <button id="place-order" value="confirm" type="submit">Place order</button>
+        <button id="review-order" value="review" type="submit">Review order</button>
+        <button id="place-order" value="confirm" type="submit" hidden>Place order</button>
       </div>
     </form>
   </dialog>

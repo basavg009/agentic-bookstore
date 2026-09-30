@@ -78,15 +78,17 @@
       const decoder = new TextDecoder();
       let buffer = "";
       let cartDirty = false;
+      // Match blank line between SSE events with either \n\n or \r\n\r\n.
+      const EVENT_SEP = /\r?\n\r?\n/;
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
         buffer += decoder.decode(value, { stream: true });
-        let sep;
-        while ((sep = buffer.indexOf("\n\n")) >= 0) {
-          const raw = buffer.slice(0, sep);
-          buffer = buffer.slice(sep + 2);
-          const lines = raw.split("\n");
+        let match;
+        while ((match = EVENT_SEP.exec(buffer))) {
+          const raw = buffer.slice(0, match.index);
+          buffer = buffer.slice(match.index + match[0].length);
+          const lines = raw.split(/\r?\n/);
           let event = "message";
           let data = "";
           for (const line of lines) {

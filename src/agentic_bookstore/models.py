@@ -110,3 +110,42 @@ class OrderItem(Base):
     quantity: Mapped[int] = mapped_column(Integer)
 
     order: Mapped[Order] = relationship(back_populates="items")
+
+
+class CheckoutQuote(Base):
+    """Phase one of checkout: a priced, time-limited snapshot of the cart.
+
+    Confirming the quote (phase two) is the only way to create an order. The token
+    doubles as the idempotency key: confirming twice returns the same order.
+    """
+
+    __tablename__ = "checkout_quotes"
+
+    token: Mapped[str] = mapped_column(String(64), primary_key=True)
+    session_id: Mapped[str] = mapped_column(String(64), index=True)
+    # JSON list of {isbn13, title, medium, unit_price_cents, quantity} — prices locked here.
+    lines_json: Mapped[str] = mapped_column(Text)
+    total_cents: Mapped[int] = mapped_column(Integer)
+    requires_shipping: Mapped[bool] = mapped_column(default=False)
+    shipping_name: Mapped[str] = mapped_column(String(200), default="")
+    shipping_address: Mapped[str] = mapped_column(String(500), default="")
+    email: Mapped[str] = mapped_column(String(200), default="")
+    # open → used (order placed). Expiry is derived from expires_at.
+    status: Mapped[str] = mapped_column(String(10), default="open")
+    order_id: Mapped[str | None] = mapped_column(String(36), unique=True, default=None)
+    created_at: Mapped[int] = mapped_column(Integer)  # epoch seconds
+    expires_at: Mapped[int] = mapped_column(Integer)  # epoch seconds
+
+
+class ChatMessage(Base):
+    """Server-side conversation memory for the chat agent, one row per message."""
+
+    __tablename__ = "chat_messages"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    session_id: Mapped[str] = mapped_column(String(64), index=True)
+    role: Mapped[str] = mapped_column(String(16))  # user | assistant | tool
+    content: Mapped[str] = mapped_column(Text, default="")
+    name: Mapped[str | None] = mapped_column(String(64), default=None)  # tool name
+    tool_calls_json: Mapped[str | None] = mapped_column(Text, default=None)
+    created_at: Mapped[int] = mapped_column(Integer)  # epoch seconds

@@ -17,7 +17,7 @@
     add_to_cart: "🛒",
     view_cart: "👀",
     remove_from_cart: "🗑️",
-    checkout: "✅",
+    prepare_checkout: "🧾",
   };
 
   try {
@@ -33,6 +33,17 @@
     return;
   }
 
+  // Restore the conversation the server remembers for this session.
+  try {
+    const { messages } = await fetch("/api/chat/history", { credentials: "same-origin" }).then((r) => r.json());
+    for (const m of messages) addMsg(m.role === "user" ? "user" : "bot", m.content);
+  } catch { /* history is a convenience; the chat still works without it */ }
+
+  document.getElementById("chat-reset").addEventListener("click", async () => {
+    await fetch("/api/chat/history", { method: "DELETE", credentials: "same-origin" });
+    messagesEl.querySelectorAll(".msg:not(:first-child)").forEach((el) => el.remove());
+  });
+
   function addMsg(role, text) {
     const el = document.createElement("div");
     el.className = `msg ${role}`;
@@ -47,6 +58,32 @@
     el.className = "msg tool";
     const icon = TOOL_ICONS[name] || "🔧";
     el.textContent = `${icon} ${name}${summary ? " — " + summary : ""}`;
+    messagesEl.appendChild(el);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  // The agent can only prepare a quote. Placing the order takes this human click.
+  function addConfirmCard(quote) {
+    const el = document.createElement("div");
+    el.className = "msg confirm-card";
+    el.innerHTML = (window.Storefront ? window.Storefront.renderQuote(quote) : "") + `
+      <div class="confirm-actions">
+        <button type="button" data-act="confirm">Confirm purchase — $${(quote.total_cents / 100).toFixed(2)}</button>
+        <button type="button" data-act="cancel">Cancel</button>
+      </div>`;
+    el.addEventListener("click", async (e) => {
+      const act = e.target.closest("button")?.dataset.act;
+      if (!act) return;
+      el.querySelectorAll("button").forEach((b) => { b.disabled = true; });
+      if (act === "cancel") { addMsg("bot", "Okay — no order was placed."); return; }
+      try {
+        const order = await window.Storefront.confirmQuote(quote.confirmation_token);
+        addMsg("bot", `✅ Order ${order.order_id.slice(0, 8)}… placed — $${(order.total_cents / 100).toFixed(2)}.`);
+      } catch (err) {
+        addMsg("bot", `⚠️ ${err.message}`);
+        el.querySelectorAll("button").forEach((b) => { b.disabled = false; });
+      }
+    });
     messagesEl.appendChild(el);
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
@@ -105,11 +142,14 @@
             messagesEl.scrollTop = messagesEl.scrollHeight;
           } else if (event === "tool_call") {
             addToolChip(payload.name, "");
-            if (["add_to_cart", "remove_from_cart", "checkout"].includes(payload.name)) {
+            if (["add_to_cart", "remove_from_cart"].includes(payload.name)) {
               cartDirty = true;
             }
           } else if (event === "tool_result") {
             addToolChip(payload.name, payload.summary);
+            if (payload.name === "prepare_checkout" && payload.result?.confirmation_token) {
+              addConfirmCard(payload.result);
+            }
             if (cartDirty && window.Storefront) {
               window.Storefront.refreshCart();
               cartDirty = false;

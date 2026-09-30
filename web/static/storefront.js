@@ -140,38 +140,84 @@
     }
   });
 
-  openCheckoutBtn.addEventListener("click", () => checkoutModal.showModal());
+  // Two-phase checkout: "Review order" locks prices into a quote, "Place order"
+  // confirms that exact quote (its token is also the idempotency key).
+  const reviewEl = $("order-review");
+  const reviewBtn = $("review-order");
+  const placeBtn = $("place-order");
+  let pendingToken = null;
+
+  function resetCheckout() {
+    pendingToken = null;
+    reviewEl.hidden = true;
+    reviewEl.innerHTML = "";
+    reviewBtn.hidden = false;
+    placeBtn.hidden = true;
+  }
+
+  function renderQuote(quote) {
+    return `<h3>Order summary</h3>` + quote.items.map((i) => `
+      <div class="review-line"><span>${i.quantity} × ${escapeHtml(i.title)}</span>
+      <span>$${money(i.line_total_cents)}</span></div>`).join("") +
+      `<div class="review-line total"><span>Total</span><strong>$${money(quote.total_cents)}</strong></div>`;
+  }
+
+  async function confirmQuote(token) {
+    const order = await fetchJSON("/api/checkout/confirm", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ confirmation_token: token }),
+    });
+    $("conf-id").textContent = order.order_id;
+    $("conf-total").textContent = money(order.total_cents);
+    $("conf-delivery").textContent = order.requires_shipping
+      ? `Estimated delivery: ${order.estimated_delivery}` : "Digital items delivered instantly.";
+    confirmationModal.showModal();
+    drawerEl.hidden = true;
+    await refreshCart();
+    return order;
+  }
+
+  openCheckoutBtn.addEventListener("click", () => { resetCheckout(); checkoutModal.showModal(); });
+  checkoutForm.addEventListener("input", () => { if (pendingToken) resetCheckout(); });
 
   checkoutForm.addEventListener("submit", async (e) => {
-    if (e.submitter && e.submitter.value === "cancel") return;
+    if (e.submitter && e.submitter.value === "cancel") { resetCheckout(); return; }
     e.preventDefault();
-    const fd = new FormData(checkoutForm);
-    const body = {
-      shipping_name: fd.get("shipping_name") || "",
-      shipping_address: fd.get("shipping_address") || "",
-      email: fd.get("email") || "",
-    };
     try {
-      const order = await fetchJSON("/api/checkout", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(body),
-      });
+      if (!pendingToken) {
+        const fd = new FormData(checkoutForm);
+        const quote = await fetchJSON("/api/checkout/prepare", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            shipping_name: fd.get("shipping_name") || "",
+            shipping_address: fd.get("shipping_address") || "",
+            email: fd.get("email") || "",
+          }),
+        });
+        pendingToken = quote.confirmation_token;
+        reviewEl.innerHTML = renderQuote(quote);
+        reviewEl.hidden = false;
+        reviewBtn.hidden = true;
+        placeBtn.hidden = false;
+        placeBtn.textContent = `Place order — $${money(quote.total_cents)}`;
+        return;
+      }
+      placeBtn.disabled = true;
+      await confirmQuote(pendingToken);
       checkoutModal.close();
-      $("conf-id").textContent = order.order_id;
-      $("conf-total").textContent = money(order.total_cents);
-      $("conf-delivery").textContent = order.requires_shipping
-        ? `Estimated delivery: ${order.estimated_delivery}` : "Digital items delivered instantly.";
-      confirmationModal.showModal();
-      drawerEl.hidden = true;
-      await refreshCart();
+      resetCheckout();
     } catch (err) {
       alert(err.message);
+      resetCheckout();
+    } finally {
+      placeBtn.disabled = false;
     }
   });
 
   $("close-confirmation").addEventListener("click", () => confirmationModal.close());
 
-  window.Storefront = { refreshCart };
+  window.Storefront = { refreshCart, confirmQuote, renderQuote };
   refreshCart();
 })();

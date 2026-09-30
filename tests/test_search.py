@@ -53,3 +53,26 @@ def test_get_book():
 
 def test_get_book_missing():
     assert books_svc.get_book("0000000000000") is None
+
+
+def test_title_matches_rank_above_description_matches():
+    from agentic_bookstore.db import session_scope
+    from agentic_bookstore.models import Book
+
+    with session_scope() as s:
+        s.add(Book(
+            isbn13="9781000000990", title="The Detective's Daughter", author="Zed Rank",
+            genre="Mystery", description="A quiet family story.", format="epub",
+            medium="digital", price_cents=999, stock=-1, year=1999,
+        ))
+    result = books_svc.search_books(query="detective")
+    # "Fog on the Harbor" only mentions a detective in its description and is newer,
+    # so relevance — not year or ISBN — must put the title match first.
+    assert [b["isbn13"] for b in result["items"]][:2] == ["9781000000990", "9781000000048"]
+
+
+def test_fts_operator_words_are_literal():
+    # AND/OR/NOT/NEAR are FTS5 operators; they must not break or alter the query.
+    for q in ("NOT", "dragons AND", "OR NEAR", "harbor NOT"):
+        books_svc.search_books(query=q)  # must not raise
+    assert books_svc.search_books(query="NOT dragons")["total"] == 0

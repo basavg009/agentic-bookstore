@@ -15,7 +15,6 @@ os.environ["SESSION_SECRET"] = "test-secret"
 from agentic_bookstore.db import get_engine, init_db, rebuild_fts  # noqa: E402
 from agentic_bookstore.models import Book  # noqa: E402
 
-
 SAMPLE_BOOKS = [
     dict(
         isbn13="9781000000017",

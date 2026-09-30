@@ -63,7 +63,7 @@ class Cart(Base):
     session_id: Mapped[str] = mapped_column(String(64), primary_key=True)
     created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(UTC))
 
-    items: Mapped[list["CartItem"]] = relationship(
+    items: Mapped[list[CartItem]] = relationship(
         back_populates="cart", cascade="all, delete-orphan", lazy="selectin"
     )
 
@@ -94,7 +94,7 @@ class Order(Base):
     payment_status: Mapped[str] = mapped_column(String(20), default="paid")
     created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(UTC))
 
-    items: Mapped[list["OrderItem"]] = relationship(
+    items: Mapped[list[OrderItem]] = relationship(
         back_populates="order", cascade="all, delete-orphan", lazy="selectin"
     )
 
